@@ -13,11 +13,15 @@ export const NAV_ITEMS = [
     href: "/",
   },
   {
+    label: "AI Workbench",
+    href: "/workbench",
+  },
+  {
     label: "Documents",
     href: "/documents",
   },
   {
-    label: "Knowledge Search",
+    label: "Knowledge Base",
     href: "/knowledge",
   },
   {
@@ -41,7 +45,7 @@ export const NAV_ITEMS = [
     href: "/root-cause",
   },
   {
-    label: "Agents",
+    label: "Agent Workspace",
     href: "/agents",
   },
   {
