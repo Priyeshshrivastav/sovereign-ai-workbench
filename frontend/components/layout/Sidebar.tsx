@@ -12,7 +12,7 @@ const navigation = [
   { name: "Visual Inspection", href: "/inspection" },
   { name: "Predictive Maintenance", href: "/maintenance" },
   { name: "Root Cause", href: "/root-cause" },
-  { name: "Agent Workspace", href: "/agents" },
+  { name: "Agent Workspace", href: "/agent-workspace" },
   { name: "Settings", href: "/settings" },
   { name: "Audit Trail", href: "/audit-logs" },
 ];
