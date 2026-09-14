@@ -6,13 +6,13 @@ import { usePathname } from "next/navigation";
 const navigation = [
   { name: "Overview", href: "/" },
   { name: "AI Workbench", href: "/workbench" },
-  { name: "Knowledge Base", href: "/knowledge-base" },
+  { name: "Knowledge Base", href: "/knowledge" },
   { name: "Documents", href: "/documents" },
   { name: "Telemetry", href: "/telemetry" },
   { name: "Visual Inspection", href: "/inspection" },
   { name: "Predictive Maintenance", href: "/maintenance" },
   { name: "Root Cause", href: "/root-cause" },
-  { name: "Agent Workspace", href: "/agent-workspace" },
+  { name: "Agent Workspace", href: "/agents" },
   { name: "Settings", href: "/settings" },
   { name: "Audit Trail", href: "/audit-logs" },
 ];

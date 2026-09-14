@@ -1,8 +1,6 @@
-// frontend/lib/api/system.ts
-
 import { apiFetch } from "./client";
 import { mockSystemStatus } from "@/lib/mocks/system";
-import type { SystemStatus } from "@/lib/types";
+import type { SystemStatus } from "@/lib/types/system";
 
 const USE_MOCKS =
   process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
