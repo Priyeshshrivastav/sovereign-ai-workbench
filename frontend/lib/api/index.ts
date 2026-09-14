@@ -1,3 +1,5 @@
+// frontend/lib/api/index.ts
+
 import {
   AgentQueryRequest,
   AgentQueryResponse,
@@ -13,82 +15,48 @@ import {
   RootCauseResponse,
   SystemStatus,
   TelemetryAnalysis,
-  VisionInspectionResponse
-} from "./types";
+  VisionInspectionResponse,
+} from "@/lib/types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
-
-async function request<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      ...(options?.body instanceof FormData
-        ? {}
-        : {
-            "Content-Type": "application/json"
-          }),
-      ...(options?.headers || {})
-    },
-    cache: "no-store"
-  });
-
-  if (!response.ok) {
-    let message = `Request failed with status ${response.status}`;
-
-    try {
-      const data = await response.json();
-
-      if (data?.error?.message) {
-        message = data.error.message;
-      }
-    } catch {
-      // Keep default message.
-    }
-
-    throw new Error(message);
-  }
-
-  return response.json() as Promise<T>;
-}
+import { apiFetch, apiUpload } from "./client";
 
 export async function getSystemStatus(): Promise<SystemStatus> {
-  return request<SystemStatus>("/api/system/status");
+  return apiFetch<SystemStatus>("/api/system/status");
 }
 
 export async function uploadDocument(
   file: File
 ): Promise<DocumentUploadResponse> {
   const formData = new FormData();
+
   formData.append("file", file);
 
-  return request<DocumentUploadResponse>("/api/documents/upload", {
-    method: "POST",
-    body: formData
-  });
+  return apiUpload<DocumentUploadResponse>(
+    "/api/documents/upload",
+    formData
+  );
 }
 
 export async function getDocuments(): Promise<DocumentListResponse> {
-  return request<DocumentListResponse>("/api/documents");
+  return apiFetch<DocumentListResponse>("/api/documents");
 }
 
 export async function getDocument(
   documentId: string
 ): Promise<unknown> {
-  return request(`/api/documents/${encodeURIComponent(documentId)}`);
+  return apiFetch<unknown>(
+    `/api/documents/${encodeURIComponent(documentId)}`
+  );
 }
 
 export async function searchKnowledgeBase(
   payload: KnowledgeSearchRequest
 ): Promise<KnowledgeSearchResponse> {
-  return request<KnowledgeSearchResponse>(
+  return apiFetch<KnowledgeSearchResponse>(
     "/api/knowledge-base/search",
     {
       method: "POST",
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     }
   );
 }
@@ -96,7 +64,7 @@ export async function searchKnowledgeBase(
 export async function getTelemetryAnalysis(
   machineId: string
 ): Promise<TelemetryAnalysis> {
-  return request<TelemetryAnalysis>(
+  return apiFetch<TelemetryAnalysis>(
     `/api/telemetry/${encodeURIComponent(machineId)}/analysis`
   );
 }
@@ -113,25 +81,22 @@ export async function inspectImage(
     formData.append("machine_id", machineId);
   }
 
-  return request<VisionInspectionResponse>(
+  return apiUpload<VisionInspectionResponse>(
     "/api/vision/inspect",
-    {
-      method: "POST",
-      body: formData
-    }
+    formData
   );
 }
 
 export async function predictMaintenance(
   machineId: string
 ): Promise<MaintenancePrediction> {
-  return request<MaintenancePrediction>(
+  return apiFetch<MaintenancePrediction>(
     "/api/maintenance/predict",
     {
       method: "POST",
       body: JSON.stringify({
-        machine_id: machineId
-      })
+        machine_id: machineId,
+      }),
     }
   );
 }
@@ -139,7 +104,7 @@ export async function predictMaintenance(
 export async function getMaintenanceHistory(
   machineId: string
 ): Promise<MaintenanceHistoryResponse> {
-  return request<MaintenanceHistoryResponse>(
+  return apiFetch<MaintenanceHistoryResponse>(
     `/api/maintenance/history/${encodeURIComponent(machineId)}`
   );
 }
@@ -148,45 +113,45 @@ export async function investigateRootCause(
   machineId: string,
   context?: string
 ): Promise<RootCauseResponse> {
-  return request<RootCauseResponse>(
+  return apiFetch<RootCauseResponse>(
     "/api/root-cause/investigate",
     {
       method: "POST",
       body: JSON.stringify({
         machine_id: machineId,
-        ...(context ? { context } : {})
-      })
+        ...(context ? { context } : {}),
+      }),
     }
   );
 }
 
 export async function getAgents(): Promise<AgentsResponse> {
-  return request<AgentsResponse>("/api/agents");
+  return apiFetch<AgentsResponse>("/api/agents");
 }
 
 export async function runAgentQuery(
   payload: AgentQueryRequest
 ): Promise<AgentQueryResponse> {
-  return request<AgentQueryResponse>(
+  return apiFetch<AgentQueryResponse>(
     "/api/agents/query",
     {
       method: "POST",
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     }
   );
 }
 
 export async function loadDemoData(): Promise<DemoDataResponse> {
-  return request<DemoDataResponse>(
+  return apiFetch<DemoDataResponse>(
     "/api/settings/demo-data/load",
     {
-      method: "POST"
+      method: "POST",
     }
   );
 }
 
 export async function getDemoDataStatus(): Promise<DemoDataResponse> {
-  return request<DemoDataResponse>(
+  return apiFetch<DemoDataResponse>(
     "/api/settings/demo-data/status"
   );
 }
@@ -198,7 +163,7 @@ export async function getAuditLogs(
     ? `?event_type=${encodeURIComponent(eventType)}`
     : "";
 
-  return request<AuditLogsResponse>(
+  return apiFetch<AuditLogsResponse>(
     `/api/audit-logs${query}`
   );
 }

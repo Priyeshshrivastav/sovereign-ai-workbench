@@ -1,22 +1,49 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { getSystemStatus } from "@/lib/api";
-import { SystemStatus } from "@/lib/types";
+import type { SystemStatus } from "@/lib/types";
+
+const USE_MOCKS =
+  process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
 
 export default function Header() {
-  const [status, setStatus] = useState<SystemStatus | null>(null);
+  const [status, setStatus] =
+    useState<SystemStatus | null>(null);
+
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     getSystemStatus()
-      .then(setStatus)
-      .catch(() => setStatus(null));
+      .then((data) => {
+        if (!mounted) return;
+
+        setStatus(data);
+        setError(null);
+      })
+      .catch((err) => {
+        if (!mounted) return;
+
+        setStatus(null);
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load system status."
+        );
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-[#080d18]/95 backdrop-blur">
       <div className="flex min-h-[72px] items-center justify-between gap-6 px-5 md:px-7">
-        {/* Title */}
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -31,10 +58,17 @@ export default function Header() {
           </h2>
         </div>
 
-        {/* System indicators */}
         <div className="hidden items-center gap-2 md:flex">
           {status ? (
             <>
+              {USE_MOCKS && (
+                <StatusPill
+                  label="ENV"
+                  value="MOCK"
+                  active
+                />
+              )}
+
               <StatusPill
                 label="PROCESSING"
                 value={
@@ -42,26 +76,42 @@ export default function Header() {
                     ? "LOCAL"
                     : "REMOTE"
                 }
-                active={status.sovereignty.local_processing}
+                active={
+                  status.sovereignty.local_processing
+                }
               />
 
               <StatusPill
                 label="MODELS"
                 value={status.models.status}
+                active={
+                  status.models.status === "online"
+                }
               />
 
               <StatusPill
                 label="RAG"
                 value={status.rag_engine.status}
+                active={
+                  status.rag_engine.status === "online"
+                }
               />
             </>
           ) : (
-            <div className="flex items-center gap-2 rounded-lg border border-red-900/50 bg-red-950/20 px-3 py-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+            <div className="max-w-sm rounded-lg border border-red-900/50 bg-red-950/20 px-3 py-2">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
 
-              <span className="text-[10px] font-medium uppercase tracking-wider text-red-300">
-                Backend unavailable
-              </span>
+                <span className="text-[10px] font-medium uppercase tracking-wider text-red-300">
+                  Backend unavailable
+                </span>
+              </div>
+
+              {error && (
+                <p className="mt-1 text-[9px] text-red-400/80">
+                  {error}
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -83,7 +133,9 @@ function StatusPill({
     <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2">
       <span
         className={`h-1.5 w-1.5 rounded-full ${
-          active ? "bg-emerald-400" : "bg-slate-500"
+          active
+            ? "bg-emerald-400"
+            : "bg-slate-500"
         }`}
       />
 
